@@ -1,0 +1,207 @@
+<script src="/ejs.min.js"></script>
+<header class="main-header">
+    <a href="/"><img style="width: 32px; float: left; margin-left: 10px" src="/img/pen-container.svg"/></a>
+	<h1>Rédiger un nouvel article</h1>
+</header>
+<section id="overview" class="editor">
+	<div id="wysywyg-article">
+	</div>
+	<div class="edit case">
+		<form id="input-article" autocomplete="off"  enctype="multipart/form-data" method="POST" action="/article">
+			<textarea id="article-title" class="article-title" name="title" placeholder="Titre de l'article"></textarea>
+			<div class="preview">
+				<textarea id="preview" name="preview" placeholder="Résumez son contenu en quelques lignes pour le rendre accrocheur et représentatif sur contenu de l'article."></textarea>
+			</div>
+			<div class="preview">
+				<textarea id="raw-text" name="text" placeholder="Collez-ici le texte brut de l'article"></textarea>
+			</div>
+			<input type="hidden" name="tags" id="tags"/>
+			<input id="submit" type="submit" name="submit" placeholder="Soumettre">
+		</form>
+		<div class="flex">
+			<div>
+				Ajouter un tag ?
+				<input id="tagInput" type="text" name="tagInput" placeholder="enter a tag">
+				<!-- The tag need attribute type at "button" else it send the form -->
+				<button type="button" id="tagAdder">+</button>
+			</div>
+		</div>
+		<ul id="tagContainer">
+		</ul>
+	</div>
+</section>
+<script type="text/javascript">
+	var removeTag = function(){};
+	function getRequest() {
+	    var xhr = null;
+	    if (window.XMLHttpRequest || window.ActiveXObject) {
+	        if (window.ActiveXObject) {
+	            try {
+	                xhr = new ActiveXObject("Msxml2.XMLHTTP");
+	            } catch(e) {
+	                xhr = new ActiveXObject("Microsoft.XMLHTTP");
+	            }
+	        } else {
+	            xhr = new XMLHttpRequest();
+	        }
+	    } else {
+	        alert("Votre navigateur ne supporte pas l'objet XMLHTTPRequest...");
+	        return null;
+	    }
+	    return xhr;
+	}
+	function getTemplate(template, callback) {
+		var connexion = getRequest();
+		connexion.onreadystatechange = function() {
+			if (connexion.readyState === 4 && (connexion.status === 200 || connexion.status === 0)) {
+				callback(connexion.response);
+			}
+		}
+		connexion.open('GET', template, true);
+		connexion.send(null);
+	}
+	document.addEventListener('DOMContentLoaded', function() {
+		var ejsArticle = "";
+		var ejsTag = "";
+		// Growable textArea
+		var observe = function (element, event, handler) {
+	    	element.addEventListener(event, function() {
+	    		handler(element);
+	    	}, false);
+		};
+	    var title = document.getElementById('article-title');
+	    var preview = document.getElementById('preview');
+	    var rawText = document.getElementById('raw-text');
+	    var wysywyg = document.getElementById('wysywyg-article');
+	    var tagAdder = document.getElementById('tagAdder');
+	    var tagInput = document.getElementById('tagInput');
+	    var tags = document.getElementById('tags');
+	    var article = {
+			title : title.value || title.placeholder,
+			author: {
+			},
+			date : {
+				timestamp : Date.now()
+			},
+			text : rawText.value || rawText.placeholder,
+			preview : preview.value || preview.placeholder,
+			tags : []
+		};
+		var form = document.getElementById('input-article');
+		form.addEventListener('submit', function(event) {
+			tags.value = article.tags.join(',');
+		});
+	    function updatePreview() {
+	    	wysywyg.innerHTML = ejs.render(ejsArticle, { article : article });
+	    };
+	    function updateTag() {
+    		tagContainer.innerHTML =  ejs.render(ejsTag, { tags : article.tags });
+		};
+	    getTemplate('/template/tagList.ejs', function(template) {
+	    	var tagContainer = document.getElementById('tagContainer');
+			ejsTag = template;
+		    removeTag = function(tagName) {
+		    	var index = article.tags.indexOf(tagName);
+		    	if (index > -1) {
+		    		article.tags.splice(index, 1);
+		    		updatePreview();
+		    		updateTag();
+		    	}
+		    };
+			function addTag() {
+				var tagName = tagInput.value.trim();
+		    	tagInput.value = '';
+		    	// if (tagName.length > 0) {
+		    	// 	tagName = tagName.replace(",", '');
+		    	// 	tagName = tagName.replace(";", '');
+		    	// 	tagName = tagName.replace("<", '');
+		    	// 	tagName = tagName.replace(">", '');
+		    	// 	tagName = tagName.replace("\\", '');
+		    	// 	tagName = tagName.replace("/", '');
+		    	// 	tagName = tagName.replace(":", '');
+		    	// 	tagName = tagName.replace("{", '');
+		    	// 	tagName = tagName.replace("}", '');
+		    	// 	tagName = tagName.replace("|", '');
+		    	// 	tagName = tagName.replace("]", '');
+		    	// 	tagName = tagName.replace("[", '');
+		    	// 	tagName = tagName.replace("'", '');
+		    	// 	tagName = tagName.replace('"	', '');
+		    	// }
+		    	if (tagName.length > 0 && article.tags.indexOf(tagName) < 0) {
+		    		article.tags.push(tagName);
+		    		updatePreview();
+		    		updateTag();
+		    	}
+			}
+		    tagAdder.addEventListener('click', function(event) {
+		    	event.stopPropagation();
+		    	addTag();
+		    });
+		    tagInput.addEventListener('keydown', function(event) {
+		    	event.stopPropagation();
+		    	if (event.keyCode == 13) {
+			    	addTag();
+			    }
+		    });
+		    // tagInput.addEventListener('keyup', function(event) {
+		    // 	event.stopPropagation();
+		    // });
+		    // tagInput.addEventListener('keypress', function(event) {
+		    // 	event.stopPropagation();
+		    // });
+		});
+	    // Asynchronous downloading
+		getTemplate('/template/article.ejs', function(template) {
+			ejsArticle = template;
+			updatePreview();
+			// Auto-update on basic event
+		    title.addEventListener('change', function(event) {
+		    	article.title = title.value || title.placeholder;
+		    	updatePreview();
+		    });
+		    title.addEventListener('keyup', function(event) {
+		    	article.title = title.value || title.placeholder;
+		    	updatePreview();
+		    });
+		    preview.addEventListener('change', function(event) {
+		    	article.preview = preview.value || preview.placeholder;
+		    	updatePreview();
+		    });
+		    preview.addEventListener('keyup', function(event) {
+		    	article.preview = preview.value || preview.placeholder;
+		    	updatePreview();
+			});
+		    rawText.addEventListener('change', function(event) {
+		    	article.text = rawText.value || rawText.placeholder;
+		    	updatePreview();
+		    });
+		    rawText.addEventListener('keyup', function(event) {
+		    	article.text = rawText.value || rawText.placeholder;
+		    	updatePreview();
+		    });
+		});
+		// @TODO replace getComputedStyle by faster method
+	    function resize (text) {
+	        text.style.height = '1em';
+			var style = window.getComputedStyle(text, null);
+			var pt = parseInt(style.getPropertyValue('padding-top'));
+			var pb = parseInt(style.getPropertyValue('padding-bottom'));
+			console.log(pt, pb);
+	        text.style.height = (text.scrollHeight - (pt + pb)) + 'px';
+	    }
+	    /* 0-timeout to get the already changed text */
+	    function delayedResize (elt) {
+	        window.setTimeout(function () {
+	        	resize(elt);
+	        }, 0);
+	    }
+	    observe(title, 'change',  resize);
+	    observe(title, 'cut',     delayedResize);
+	    observe(title, 'paste',   delayedResize);
+	    observe(title, 'drop',    delayedResize);
+	    observe(title, 'keydown', delayedResize);
+	    title.focus();
+	    title.select();
+	    //resize(title);
+	});
+</script>

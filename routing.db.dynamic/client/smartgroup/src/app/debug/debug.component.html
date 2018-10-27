@@ -1,0 +1,20 @@
+<div id="debug">
+debug mode
+<div class="container">
+	<div class="row">
+		<span>pseudo: </span>
+
+		<!-- use (event) to listen a specific event -->
+		<!-- use [directive] to bind a specific directive to your element-->
+		<!-- [(ngModel)] allow two ways binding (between view and model) -->
+		<input 
+			type="text"
+			[(ngModel)]="text"
+			(click)="onClick()"
+		/>
+
+		<!-- string interpolation or one-way binding (only model to view) -->
+		<span>{{ text }}</span>
+	</div>
+</div>
+</div>
