@@ -10,7 +10,6 @@ let server = Express();
 
 Mongoose.connect(Config.databaseUrl);
 
-
 server.use(BosyParer.jsoon());
 server.use("")
 

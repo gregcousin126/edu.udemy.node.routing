@@ -5,25 +5,19 @@ const UserAPI = require('.routes/routes');
 
 const Config = require('./configuration/serverconfig.js');
 
-//start new express application
-let server = Express();
+let server = Express(); //start new express application
 
 Mongoose.connect(Config.databaseUrl);
 
 server.use(BodyParer.json());
 server.use("")
 
-server.listen(Config.port, function() {
-  console.log("server started on port: "+Config.port);
-})
+server.listen(Config.port, function() { console.log("server started on port: "+Config.port); })
 
-server.get("/test", function(request, response){
-  response.json({message: "Hello World"})
-});
+server.get("/test", function(request, response){ response.json({message: "Hello World"}) });
 
 server.post("/test", function (request, response) {
   let Username = request.body.username;
-  console.log(Username);
   response.json({message: "Hello "+ Username});
 });
 

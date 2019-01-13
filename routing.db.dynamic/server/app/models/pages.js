@@ -12,6 +12,4 @@ const PageSchema = new Schema({
 	template: String,
 });
 
-// elle accepte de nouvelle entrées que si l'objet passé
-// en param respecte le schema
-module.exports = mongoose.model("Pages", PageSchema);
+module.exports = mongoose.model("Pages", PageSchema); // elle accepte de nouvelle entrées que si l'objet passé // en param respecte le schema

@@ -19,11 +19,8 @@ router.post('/', async (req, res) => {
 	}
 });
 
-// async : declaration of function, means two points :
-// - 1 - this function return a promise - 2 - this function use an await keyword
-router.get('/:name', async (req, res) => {
-	// use params instead of body
-	// --> extract value from url (pages/hello)
+// async : declaration of function, means two points : // -> 1 - this function return a promise - 2 - this function use an await keyword
+router.get('/:name', async (req, res) => { // use params instead of body // --> extract value from url (pages/hello)
 	let wantedPage = await Page.findOne({ name : req.params.name });
 	if (wantedPage !== null) {
 		console.log(wantedPage);
@@ -43,6 +40,7 @@ router.get('/:name', async (req, res) => {
 		res.render('page', defaultPage);
 	}
 });
+
 router.put('/:name', async (req, res) => {
   let page = await Page.findOne({ name : req.params.name });
   if (page !== null) {
@@ -63,8 +61,7 @@ router.put('/:name', async (req, res) => {
   }
 });
 
-// =  assign, ==  fast equals, === strong equals
-// www.site.com?param=12&param2=84&parems=52 => retrieve it using req.query
+// =  assign, ==  fast equals, === strong equals // www.site.com?param=12&param2=84&parems=52 => retrieve it using req.query
 router.put('/:name/updateScript', async (req, res) => {
   let page = await Page.findOne({ name : req.params.name });
   let result = page;
@@ -90,4 +87,5 @@ router.put('/:name/updateScript', async (req, res) => {
     res.send('page not found');
   }
 });
+
 module.exports = router;
