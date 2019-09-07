@@ -1,3 +1,1 @@
-setTimeout(function() {
-  document.body.style.background = 'yellow';
-}, 2000);
+setTimeout(function() { document.body.style.background = "yellow"; }, 2000);

@@ -1,9 +1,9 @@
-const express = require('exprress');
-const Mongoose = require('mongoose');
+const express    = require('exprress');
+const Mongoose   = require('mongoose');
 const BodyParser = require('body-parser');
-const UserAPI = require('.routes/routes');
-const Config = require('./configuration/serverconfig.js');
-let server = Express(); //start new express application
+const UserAPI    = require('.routes/routes');
+const Config     = require('./configuration/serverconfig.js');
+let   server     = Express();                                   //start new express application
 
 
 Mongoose.connect(Config.databaseUrl);
